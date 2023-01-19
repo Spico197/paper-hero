@@ -1,10 +1,10 @@
-import re
 import pathlib
+import re
 
 import feedparser
 
-from src.interfaces import Paper
 from src.engine import SearchAPI
+from src.interfaces import Paper
 from src.utils import download
 
 
@@ -12,15 +12,15 @@ class ArxivPaperList(SearchAPI):
     """arXiv API
 
     Inputs:
-        cache_filepath: filepath to save cached file
+        cache_filepath: Filepath to save cached file
         use_cache: will use cached file if `True`
-        raw: raw api query, e.g. `cat:cs.CL AND ti:event`. If set, others will be disabled
-        title: string of title you wanna search
-        author: author string
-        abstract: abstract string
-        comment: comment string
+        raw: Raw api query, e.g. `cat:cs.CL AND ti:event`. If set, others will be disabled
+        title: String of title you wanna search
+        author: Author string
+        abstract: Abstract string
+        comment: Comment string
         category: arXiv category, e.g. "cs.CL"
-        max_results: maximal returned papers
+        max_results: Maximal returned papers
         sort_by: `submittedDate` (default) or `lastUpdatedDate`
         sort_order: `descending` (default) or `ascending`
 
@@ -51,6 +51,7 @@ class ArxivPaperList(SearchAPI):
     References:
         https://arxiv.org/help/api/user-manual#title_id_published_updated
     """
+
     API_URL = "https://export.arxiv.org/api/query?search_query="
 
     def __init__(
@@ -102,7 +103,7 @@ class ArxivPaperList(SearchAPI):
             query = query.strip().replace(" ", "+")
             query = query.replace("(", "%28")
             query = query.replace(")", "%29")
-            query = query.replace("\"", "%22")
+            query = query.replace('"', "%22")
 
             url = f"{self.API_URL}{query}&start=0&max_results={max_results}&sortBy={sort_by}&sortOrder={sort_order}"
             download(url, cache_filepath)
@@ -112,7 +113,7 @@ class ArxivPaperList(SearchAPI):
         for entry in feed.entries:
             author = ""
             if hasattr(entry, "authors"):
-                author = ' , '.join(author.name for author in entry.authors)
+                author = " , ".join(author.name for author in entry.authors)
             url = ""
             doi = ""
             for link in entry.links:
@@ -128,14 +129,16 @@ class ArxivPaperList(SearchAPI):
                 date = entry.updated_parsed
 
             title = re.sub(r"[\s\n]+", " ", entry.title, flags=re.MULTILINE).strip()
-            abstract = re.sub(r"[\s\n]+", " ", entry.summary, flags=re.MULTILINE).strip()
+            abstract = re.sub(
+                r"[\s\n]+", " ", entry.summary, flags=re.MULTILINE
+            ).strip()
             paper = Paper(
                 title,
                 author,
                 abstract,
                 url,
                 doi,
-                " , ".join([t['term'] for t in entry.tags]),
+                " , ".join([t["term"] for t in entry.tags]),
                 str(date.tm_year),
                 str(date.tm_mon),
             )

@@ -20,7 +20,7 @@ from src.interfaces.aclanthology import AclanthologyPaperList
 from src.utils import dump_paper_list_to_markdown_checklist
 
 if __name__ == "__main__":
-    # use `bash scripts/get_aclanthology.sh` to download and prepare anthology data
+    # use `bash scripts/get_aclanthology.sh` to download and prepare anthology data first
     paper_list = AclanthologyPaperList("cache/aclanthology.json")
     ee_query = {
         "title": [
@@ -51,5 +51,5 @@ if __name__ == "__main__":
 ## 🗺️ Roadmap
 
 - [x] aclanthology
-- [ ] arXiv
-- [ ] dblp
+- [x] arXiv
+- [x] dblp
