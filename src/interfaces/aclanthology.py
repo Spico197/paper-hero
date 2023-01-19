@@ -14,7 +14,7 @@ class AclanthologyPaperList(SearchAPI):
 
         self.papers = []
         for d in data:
-            authors = ", ".join(
+            authors = " , ".join(
                 [self.extract_author_full(author) for author in d.get("authors", [])]
             )
             venue = d.get("venue", [])
