@@ -1,6 +1,6 @@
 # 💪 Paper Hero
 
-A toolkit to help search papers from aclanthology, arXiv and dblp.
+A toolkit to help search for papers from aclanthology, arXiv and dblp.
 
 ## 🌴 Setup
 

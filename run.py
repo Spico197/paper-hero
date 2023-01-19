@@ -50,7 +50,11 @@ if __name__ == "__main__":
     arxiv_paper_list = ArxivPaperList(
         "cache/ee-arxiv.xml",
         use_cache=True,
-        title="Event Extraction OR Event Argument Extraction OR Event Detection OR Event Classification OR Event Tracking OR Event Relation Extraction OR Information Extraction",
+        title=(
+            "Event Extraction OR Event Argument Extraction OR Event Detection"
+            " OR Event Classification OR Event Tracking"
+            " OR Event Relation Extraction OR Information Extraction"
+        ),
         category="cs.CL",
     )
     arxiv_ee_query = {
