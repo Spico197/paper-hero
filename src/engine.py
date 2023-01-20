@@ -33,8 +33,6 @@ class SearchAPI:
                             paper_indices.append(i)
                 papers = [papers[i] for i in paper_indices]
 
-        if papers:
-            papers = sorted(papers, key=lambda p: (p.year, p.month), reverse=True)
         return papers
 
     def search(
@@ -58,10 +56,15 @@ class SearchAPI:
         Returns:
             a list of `Paper`
         """
+        papers = []
         if method == "exhausted":
-            return self.exhausted_search(query)
+            papers = self.exhausted_search(query)
         else:
             raise NotImplementedError
+
+        if papers:
+            papers = sorted(set(papers), key=lambda p: (p.year, p.month), reverse=True)
+        return papers
 
     def tokenize(self, string: str) -> list[str]:
         return string.lower().split()

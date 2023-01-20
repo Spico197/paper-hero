@@ -22,5 +22,18 @@ class Paper:
             "venue": self.venue,
         }
 
+    def as_tuple(self) -> tuple:
+        return (
+            self.title,
+            self.authors,
+            self.abstract,
+            self.url,
+            self.doi,
+            self.venue,
+        )
+
     def __getitem__(self, attr_key: str):
         return getattr(self, attr_key)
+
+    def __hash__(self) -> int:
+        return hash(self.as_tuple())

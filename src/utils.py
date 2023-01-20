@@ -122,6 +122,24 @@ def dump_json(data: list | dict, filepath: str | pathlib.Path):
         json.dump(data, fout, ensure_ascii=False)
 
 
+def load_jsonlines(filepath, **kwargs):
+    data = list()
+    with open(filepath, "rt", encoding="utf-8") as fin:
+        for line in fin:
+            line_data = json.loads(line.strip())
+            data.append(line_data)
+    return data
+
+
+def dump_jsonlines(obj, filepath, **kwargs):
+    with open(filepath, "wt", encoding="utf-8") as fout:
+        for d in obj:
+            line_d = json.dumps(
+                d, ensure_ascii=False, **kwargs
+            )
+            fout.write("{}\n".format(line_d))
+
+
 def dump_list_to_markdown_checklist(str_list: list[str], filepath: str | pathlib.Path):
     md_string = ""
     for string in str_list:
@@ -142,6 +160,13 @@ def dump_paper_list_to_markdown_checklist(papers: list[Paper], filepath: str | p
         for paper in papers
     ]
     dump_list_to_markdown_checklist(string_list, filepath)
+
+
+def dump_paper_list_to_jsonlines(papers: list[Paper], filepath: str | pathlib.Path):
+    dump = []
+    for paper in papers:
+        dump.append(paper.as_dict())
+    dump_jsonlines(dump, filepath)
 
 
 if __name__ == "__main__":
