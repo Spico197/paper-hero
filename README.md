@@ -12,7 +12,14 @@ A toolkit to help search for papers from aclanthology, arXiv and dblp.
 Run the example in `run.py`:
 
 ```bash
+$ # clone this repo
+$ git clone https://github.com/Spico197/paper-hero.git
+$ cd paper-hero
+$ # get ready for the acl data, since it is cache-based
+$ bash scripts/get_aclanthology.sh
 $ python run.py
+$ # the results will be saved into `results/`, check them out 🎉
+$ ls results
 ```
 
 ```python
