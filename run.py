@@ -2,8 +2,8 @@ from src.interfaces.aclanthology import AclanthologyPaperList
 from src.interfaces.arxiv import ArxivPaperList
 from src.interfaces.dblp import DblpPaperList
 from src.utils import (
-    dump_paper_list_to_markdown_checklist,
     dump_paper_list_to_jsonlines,
+    dump_paper_list_to_markdown_checklist,
 )
 
 if __name__ == "__main__":
@@ -85,9 +85,7 @@ if __name__ == "__main__":
     dump_paper_list_to_markdown_checklist(
         arxiv_ee_papers, "results/arxiv-ee-paper-list.md"
     )
-    dump_paper_list_to_jsonlines(
-        arxiv_ee_papers, "results/arxiv-ee-paper-list.jsonl"
-    )
+    dump_paper_list_to_jsonlines(arxiv_ee_papers, "results/arxiv-ee-paper-list.jsonl")
 
     # dblp papers
     dblp_paper_list = DblpPaperList(
@@ -124,6 +122,4 @@ if __name__ == "__main__":
     dump_paper_list_to_markdown_checklist(
         dblp_ee_papers, "results/dblp-ee-paper-list.md"
     )
-    dump_paper_list_to_jsonlines(
-        dblp_ee_papers, "results/dblp-ee-paper-list.jsonl"
-    )
+    dump_paper_list_to_jsonlines(dblp_ee_papers, "results/dblp-ee-paper-list.jsonl")

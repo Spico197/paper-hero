@@ -15,7 +15,7 @@ class AclanthologyPaperList(SearchAPI):
         self.papers = []
         for d in data:
             authors = " , ".join(
-                [self.extract_author_full(author) for author in d.get("authors", [])]
+                [self.extract_author_full(author) for author in d.get("author", [])]
             )
             venue = d.get("venue", [])
             if venue:
@@ -36,9 +36,13 @@ class AclanthologyPaperList(SearchAPI):
                 continue
             self.papers.append(paper)
 
-    def extract_author_full(self, name: str) -> str:
-        match = re.search(r".*?\((.*?)\)", name)
-        if match:
-            return match.group(1)
+    def extract_author_full(self, name: dict) -> str:
+        full_name = ""
+        if hasattr(name, "full"):
+            match = re.search(r".*?\((.*?)\)", name)
+            if match:
+                full_name = match.group(1)
         else:
-            return name
+            full_name = f"{name['first']} {name['last']}"
+
+        return full_name
