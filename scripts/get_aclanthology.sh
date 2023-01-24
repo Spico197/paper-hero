@@ -9,6 +9,8 @@ else
 fi
 cd acl-anthology/bin
 
+pip install -r https://raw.githubusercontent.com/acl-org/acl-anthology/master/bin/requirements.txt
+
 python -c '
 import json
 from anthology import Anthology
