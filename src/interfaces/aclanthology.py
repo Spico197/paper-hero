@@ -46,3 +46,14 @@ class AclanthologyPaperList(SearchAPI):
             full_name = f"{name['first']} {name['last']}"
 
         return full_name
+
+    @classmethod
+    def build_paper_list(cls, cache_filepath: str):
+        return cls(cache_filepath)
+
+    @classmethod
+    def build_and_search(
+        cls, cache_filepath: str, query: dict, max_results: int = -1
+    ) -> list[Paper]:
+        obj = cls.build_paper_list(cache_filepath)
+        return obj.search(query)[:max_results]

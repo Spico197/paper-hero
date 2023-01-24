@@ -117,9 +117,9 @@ def load_json(filepath: pathlib.Path) -> dict | list:
         return data
 
 
-def dump_json(data: list | dict, filepath: str | pathlib.Path):
+def dump_json(data: list | dict, filepath: str | pathlib.Path, **kwargs):
     with open(filepath, "wt", encoding="utf8") as fout:
-        json.dump(data, fout, ensure_ascii=False)
+        json.dump(data, fout, ensure_ascii=False, **kwargs)
 
 
 def load_jsonlines(filepath, **kwargs):

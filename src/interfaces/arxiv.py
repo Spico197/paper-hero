@@ -143,3 +143,47 @@ class ArxivPaperList(SearchAPI):
                 str(date.tm_mon),
             )
             self.papers.append(paper)
+
+    @staticmethod
+    def build_logic_string(req: list[list[str]]) -> str:
+        if not req:
+            return ""
+
+        tmp_strings = []
+        for and_strs in req:
+            tmp_strings.append(f"({' AND '.join(and_strs)})")
+        logic_string = " OR ".join(tmp_strings)
+        return logic_string
+
+    @classmethod
+    def build_paper_list(
+        cls, cache_filepath: str, query: dict, max_results: int = 5000
+    ):
+        title = query.get("title", [])
+        ti_string = cls.build_logic_string(title)
+        author = query.get("author", [])
+        au_string = cls.build_logic_string(author)
+        abstract = query.get("abstract", [])
+        abs_string = cls.build_logic_string(abstract)
+        venue = query.get("venue", [])
+        # only subject category is used when caching
+        if venue:
+            cat_string = venue[0]
+        else:
+            cat_string = ""
+        return cls(
+            cache_filepath,
+            use_cache=False,
+            title=ti_string,
+            author=au_string,
+            abstract=abs_string,
+            category=cat_string,
+            max_results=max_results,
+        )
+
+    @classmethod
+    def build_and_search(
+        cls, cache_filepath: str, query: dict, max_results: int = -1
+    ) -> list[Paper]:
+        obj = cls.build_paper_list(cache_filepath, query, max_results=max_results)
+        return obj.search(query)[:max_results]

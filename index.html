@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>paper-hero</title>
+  <link rel="stylesheet" href="https://unpkg.com/boltcss/bolt.min.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+      }
+    }
+  </script>
+  <style>
+    body {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    label {
+      margin-right: 1rem;
+    }
+
+    button {
+      margin: 0.2rem 0.2rem;
+    }
+
+    button:hover {
+      background-color: #dbdbdb;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .button-group {
+      margin-top: 3rem;
+    }
+
+    .search-button {
+      background-color: #ffc83d;
+      color: #d67d00;
+      font-weight: bold;
+    }
+
+    .search-button:hover {
+      background-color: #ffc83dc0;
+    }
+
+    .download-button {
+      background-color: #98ca56;
+      color: white;
+      font-weight: bold;
+    }
+
+    .download-button:hover {
+      background-color: #98ca56d1;
+    }
+
+    .output-title {
+      margin-top: 2rem;
+      margin-bottom: 0;
+      display: block;
+      background-color: #98ca56;
+      color: white;
+      font-weight: bold;
+      font-size: large;
+      padding: 6px 15px;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+    }
+
+    .output-box {
+      margin-top: 0;
+      padding: 6px 15px;
+      background-color: white;
+      border: 2px solid #98ca56;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>💪 Paper Hero</h1>
+    <p>
+      Paper Hero is a toolkit to help search for papers from aclanthology, arXiv and dblp.
+    </p>
+    <p>GitHub Address: <a href="https://github.com/Spico197/paper-hero" target="_blank">Spico197/paper-hero</a></p>
+  </header>
+
+  <main>
+    <div id="app">
+      <div class="form-group">
+        <label for="method"><strong>Source</strong></label>
+        <select id="method" v-model="method">
+          <option value="" disabled>Please select a source</option>
+          <option value="aclanthology">ACL Anthology</option>
+          <option value="arxiv">ArXiv</option>
+          <option value="dblp">DBLP</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="max-res"><strong>Max Results</strong></label>
+        <input id="max-res" type="number" v-model="maxResults">
+      </div>
+
+      <div class="form-group">
+        <label for="add-field"><strong>New Field</strong></label>
+        <select id="add-field" v-model="addField">
+          <option value="" disabled>Please select a field</option>
+          <option :value="field" v-for="field in restFields">{{ field }}</option>
+        </select>
+        <button @click.prevent="addNewField">Add</button>
+      </div>
+
+      <hr>
+
+      <div>
+        <p><strong>Fields</strong></p>
+        <p>
+          Add <code>&&</code> to represent <code>AND</code> logic, e.g. <code>span-based && event extraction</code>
+          means <em>span-based</em> and <em>event extraction</em> both appear in a field.
+        </p>
+        <p>
+          For <code>year</code> and <code>month</code> fields, the query should
+          follow the <code>start && end</code> format,
+          e.g. year <code>2006 && 2013</code> means searching for papers published
+          between <code>2006</code> and <code>2013</code>.
+        </p>
+        <div v-for="(groups, field) in query">
+          <label :for="field"><strong>{{ field }}</strong></label>
+          <div v-for="(group, index) in groups">
+            <input class="field-input" type="text" v-model="query[field][index]" placeholder="text1 && text2 && text3"
+              size="50">
+            <button @click.prevent="rmAnd(field, index)">X</button>
+          </div>
+          <button @click.prevent="addOr(field)">OR</button>
+        </div>
+      </div>
+
+      <div v-if="timerHandler">
+        <p>⏱️ {{ searchSecondsTwoDecimal }}</p>
+      </div>
+
+      <div v-if="output">
+        <p class="output-title">Output Info</p>
+        <p class="output-box">
+          {{ output }}
+          <br>
+          You are ready to download the results by clicking the download button below.
+          <br>
+          Like this tool? ⭐ me on <a href="https://github.com/Spico197/paper-hero" target="_blank">GitHub</a> !
+        </p>
+      </div>
+
+      <div class="button-group">
+        <button @click.prevent="resetQuery">Reset</button>
+        <button class="search-button" @click.prevent="search">Search</button>
+        <a :href="downloadHref" :download="`${method}.json`" v-if="downloadHref">
+          <button class="search-button download-button">Download</button>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <hr>
+    Made by <a href="https://spico197.github.io" target="_blank">Tong Zhu</a> w/ 💖
+  </footer>
+
+  <script type="module">
+    import { createApp, ref, computed, toRaw, watch } from 'vue'
+
+    createApp(
+      {
+        setup() {
+          const method = ref("aclanthology")
+          const query = ref({ title: [[]] })
+          const maxResults = ref(2000)
+          const addField = ref("")
+          const allFields = ["title", "author", "abstract", "venue", "year", "month"]
+          const downloadUrl = ref('')
+          const downloadToken = ref('')
+          const downloadHref = ref('')
+          const output = ref('')
+          const timerHandler = ref(0)
+          const searchSeconds = ref(0.0)
+          const searchSecondsTwoDecimal = computed(() => {
+            return `${searchSeconds.value.toFixed(1)}s`
+          })
+          const restFields = computed(() => {
+            let rest = []
+            for (const field of allFields) {
+              if (!(field in query.value)) {
+                rest.push(field)
+              }
+            }
+            return rest
+          })
+
+          function addNewField() {
+            if (addField.value) {
+              query.value[addField.value] = [[]]
+              addField.value = ""
+            }
+          }
+
+          function rmAnd(field, index) {
+            if (query.value[field].length == 1) {
+              delete query.value[field]
+            } else {
+              query.value[field].splice(index, 1)
+            }
+          }
+
+          function addOr(field) {
+            query.value[field].push([])
+          }
+
+          function resetOutput() {
+            output.value = ""
+            downloadUrl.value = ""
+            downloadToken.value = ""
+            URL.revokeObjectURL(downloadHref.value)
+            downloadHref.value = ""
+            searchSeconds.value = 0.0
+            timerHandler.value = 0
+            searchSecondsTwoDecimal.value = ""
+          }
+
+          function resetQuery() {
+            query.value = { title: [[]] }
+            resetOutput()
+          }
+
+          function startTimer() {
+            console.log("start")
+            timerHandler.value = setInterval(() => {
+              searchSeconds.value += 0.1
+            }, 100)
+          }
+
+          function endTimer() {
+            console.log("end")
+            if (timerHandler.value > 0) {
+              console.log("endi")
+              clearInterval(timerHandler.value)
+            }
+          }
+
+          function search() {
+            resetOutput()
+            startTimer()
+            let q = {}
+            for (const prop in query.value) {
+              q[prop] = []
+              for (let i = 0; i < query.value[prop].length; i++) {
+                if (query.value[prop][i].length > 0) {
+                  let andString = toRaw(query.value[prop][i])
+                  let andStrings = andString.split('&&')
+                  for (let j = 0; j < andStrings.length; j++) {
+                    andStrings[j] = andStrings[j].trim()
+                  }
+                  q[prop].push(andStrings)
+                }
+              }
+              if (q[prop].length < 1) {
+                delete q[prop]
+              }
+            }
+            const postData = JSON.stringify({
+              "method": method.value,
+              "query": q,
+              "max_results": maxResults.value,
+              "return_content": false,
+            })
+            fetch(
+              "/api/",
+              {
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: postData,
+              }
+            )
+              .then((response) => response.json())
+              .then((json) => {
+                if (json["ok"] === false) {
+                  alert(json["msg"])
+                } else {
+                  downloadUrl.value = json["url"]
+                  downloadToken.value = json["token"]
+                  output.value = `${json["msg"]}, #matched paper: ${json["paper"]}`
+                }
+              })
+              .catch((err) => { alert(err) })
+              .finally(() => endTimer())
+          }
+
+          watch(downloadUrl, (newUrl, oldUrl) => {
+            if (downloadToken.value) {
+              fetch(
+                `/download/?u=${downloadUrl.value}&t=${downloadToken.value}`,
+                {
+                  method: "GET",
+                }
+              )
+                .then((response) => response.blob())
+                .then((data) => {
+                  downloadHref.value = URL.createObjectURL(data)
+                })
+            }
+          })
+
+          return {
+            method,
+            query,
+            restFields,
+            addField,
+            addNewField,
+            search,
+            rmAnd,
+            addOr,
+            resetQuery,
+            maxResults,
+            output,
+            downloadUrl,
+            downloadHref,
+            searchSeconds,
+            timerHandler,
+            searchSecondsTwoDecimal,
+          }
+        }
+      }
+    ).mount("#app")
+  </script>
+</body>
+
+</html>

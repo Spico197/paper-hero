@@ -1,3 +1,15 @@
+---
+title: Paper Hero
+emoji: 💪
+colorFrom: indigo
+colorTo: yellow
+sdk: docker
+app_port: 7860
+pinned: true
+license: apache-2.0
+---
+
+
 # 💪 Paper Hero
 
 A toolkit to help search for papers from aclanthology, arXiv and dblp.
@@ -60,3 +72,5 @@ if __name__ == "__main__":
 - [x] aclanthology
 - [x] arXiv
 - [x] dblp
+- [x] add frontend support for building a demo
+- [x] year and month searching

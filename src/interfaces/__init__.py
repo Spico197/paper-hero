@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Paper:
     title: str
-    authors: str  # People Name1, People Name2: split by `, `
+    author: str  # People Name1, People Name2: split by `, `
     abstract: str
     url: str
     doi: str
@@ -15,21 +15,25 @@ class Paper:
     def as_dict(self):
         return {
             "title": self.title,
-            "author": self.authors,
+            "author": self.author,
             "abstract": self.abstract,
             "url": self.url,
             "doi": self.doi,
             "venue": self.venue,
+            "year": self.year,
+            "month": self.month,
         }
 
     def as_tuple(self) -> tuple:
         return (
             self.title,
-            self.authors,
+            self.author,
             self.abstract,
             self.url,
             self.doi,
             self.venue,
+            self.year,
+            self.month,
         )
 
     def __getitem__(self, attr_key: str):

@@ -9,6 +9,7 @@ from src.utils import (
 if __name__ == "__main__":
     # use `bash scripts/get_aclanthology.sh` to download and prepare anthology data first
     acl_paper_list = AclanthologyPaperList("cache/aclanthology.json")
+    # `ee_query`` is an example, and you don't have to fill all the fields
     ee_query = {
         "title": [
             ["information extraction"],
@@ -30,6 +31,19 @@ if __name__ == "__main__":
             ["tacl"],
             ["cl"],
         ],
+        "author": [
+            ["Heng Ji"],
+            ["Dan Roth"],
+        ],
+        "year": [
+            # multiple time spans with closed interval: ["2006", "2013"] means 2006-2013
+            ["2006", "2013"],
+            ["2018", "2022"],
+        ],
+        "month": [
+            # the same as the `year` field
+            ["4", "11"],
+        ]
     }
     ee_papers = acl_paper_list.search(ee_query)
     dump_paper_list_to_markdown_checklist(ee_papers, "results/ee-paper-list.md")

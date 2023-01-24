@@ -2,6 +2,7 @@ import pathlib
 import random
 import re
 import time
+import logging
 
 import requests
 from tqdm import trange
@@ -9,6 +10,9 @@ from tqdm import trange
 from src.engine import SearchAPI
 from src.interfaces import Paper
 from src.utils import dump_json, load_json
+
+
+logger = logging.getLogger("uvicorn.default")
 
 
 class DblpPaperList(SearchAPI):
@@ -34,8 +38,8 @@ class DblpPaperList(SearchAPI):
         cache_filepath: pathlib.Path,
         use_cache: bool = False,
         query: str = "",
-        max_results: int = 1000,
-        request_time_inteval: float = 5,
+        max_results: int = 5000,
+        request_time_inteval: float = 3,
     ) -> None:
         super().__init__()
 
@@ -62,7 +66,8 @@ class DblpPaperList(SearchAPI):
                         break
                 except KeyboardInterrupt:
                     raise KeyboardInterrupt
-                except Exception:
+                except Exception as err:
+                    logger.info(err)
                     break
                 time.sleep((random.random() + 0.5) * request_time_inteval)
             dump_json(searched_results, cache_filepath)
@@ -95,3 +100,29 @@ class DblpPaperList(SearchAPI):
                 "99",
             )
             self.papers.append(paper)
+
+    @classmethod
+    def build_paper_list(
+        cls, cache_filepath: str, query: dict, max_results: int = 1000
+    ):
+        title = query.get("title", [])
+        abstract = query.get("abstract", [])
+
+        cls_q = ""
+        for t in title:
+            cls_q += " ".join(t)
+        for a in abstract:
+            cls_q += " ".join(a)
+        return cls(
+            cache_filepath,
+            use_cache=False,
+            query=cls_q,
+            max_results=max_results,
+        )
+
+    @classmethod
+    def build_and_search(
+        cls, cache_filepath: str, query: dict, max_results: int = 1000
+    ) -> list[Paper]:
+        obj = cls.build_paper_list(cache_filepath, query, max_results=max_results)
+        return obj.search(query)[:max_results]

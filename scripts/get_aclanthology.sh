@@ -1,3 +1,5 @@
+set -ex
+
 mkdir cache
 cd cache
 if ! [ -f acl-anthology/bin/anthology/anthology.py ]; then
@@ -9,7 +11,7 @@ else
 fi
 cd acl-anthology/bin
 
-pip install -r https://raw.githubusercontent.com/acl-org/acl-anthology/master/bin/requirements.txt
+pip install --no-cache-dir -r ./requirements.txt
 
 python -c '
 import json

@@ -1,0 +1,12 @@
+version: "3"
+services:
+  paper_hero_api:
+    build: .
+    container_name: paper_hero
+    ports:
+      - 127.0.0.1:7860:7860
+    volumes:
+      - .:/app
+      - phero_tmp:/tmp
+volumes:
+  phero_tmp:
