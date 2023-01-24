@@ -8,11 +8,14 @@ app_port: 7860
 pinned: true
 license: apache-2.0
 ---
+![hf workflow](https://github.com/Spico197/paper-hero/actions/workflows/hf_spaces.yml/badge.svg)
 
 
 # 💪 Paper Hero
 
 A toolkit to help search for papers from aclanthology, arXiv and dblp.
+
+🎉 We have a live demo at hugginface spaces. Check it out [[here]](https://huggingface.co/spaces/Spico/paper-hero) !
 
 ## 🌴 Setup
 
@@ -66,6 +69,10 @@ if __name__ == "__main__":
     ee_papers = paper_list.search(ee_query)
     dump_paper_list_to_markdown_checklist(ee_papers, "results/ee-paper-list.md")
 ```
+
+## 🪧 Live Demo Usage
+
+https://user-images.githubusercontent.com/22840952/214235971-fb685f82-ff24-4854-9922-dc5554e4951f.mp4
 
 ## 🗺️ Roadmap
 
