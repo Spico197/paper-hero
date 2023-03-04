@@ -43,7 +43,7 @@ if __name__ == "__main__":
         "month": [
             # the same as the `year` field
             ["4", "11"],
-        ]
+        ],
     }
     ee_papers = acl_paper_list.search(ee_query)
     dump_paper_list_to_markdown_checklist(ee_papers, "results/ee-paper-list.md")

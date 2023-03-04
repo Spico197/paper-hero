@@ -20,20 +20,23 @@ A toolkit to help search for papers from aclanthology, arXiv and dblp.
 ## 🌴 Setup
 
 1. Make sure you have [Git](https://git-scm.com/) and [Python](https://www.python.org/downloads/) 3.10.8 installed (or Python >= 3.9).
-2. Install dependencies: `pip install -r requirements.txt`
+2. Install dependencies: `pip install -r requirements.txt`, `python -m spacy download en_core_web_sm`
 
 ## 🚀 QuickStart
 
 Run the example in `run.py`:
 
 ```bash
-$ # clone this repo
+# clone this repo
 $ git clone https://github.com/Spico197/paper-hero.git
 $ cd paper-hero
-$ # get ready for the acl data, since it is cache-based
+# download and install dependencies
+$ pip install -r requirements.txt
+$ python -m spacy download en_core_web_sm
+# get ready for the acl data, since it is cache-based
 $ bash scripts/get_aclanthology.sh
 $ python run.py
-$ # the results will be saved into `results/`, check them out 🎉
+# the results will be saved into `results/`, check them out 🎉
 $ ls results
 ```
 

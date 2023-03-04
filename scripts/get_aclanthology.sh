@@ -1,6 +1,6 @@
 set -ex
 
-mkdir cache
+mkdir -p cache
 cd cache
 if ! [ -f acl-anthology/bin/anthology/anthology.py ]; then
     git clone https://github.com/acl-org/acl-anthology

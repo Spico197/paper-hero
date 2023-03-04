@@ -1,3 +1,8 @@
+from collections import defaultdict
+
+import spacy
+from tqdm import tqdm
+
 from src.interfaces import Paper
 
 
@@ -6,51 +11,58 @@ class SearchAPI:
 
     def __init__(self) -> None:
         self.papers: list[Paper] = []
+        self.nlp = None
 
-    def exhausted_search(self, query: dict[str, tuple[tuple[str]]]) -> list[Paper]:
+    def in_string(self, statement: str, string: str, lemmatization: bool = False):
+        _stmt = " ".join(self.tokenize(statement, lemmatization=lemmatization))
+        _string = " ".join(self.tokenize(string, lemmatization=lemmatization))
+
+        return _stmt in _string
+
+    def exhausted_lemma_search(
+        self, query: dict[str, tuple[tuple[str]]], lemmatization: bool = False
+    ) -> list[Paper]:
         """Exhausted search papers by matching query"""
-        def _in_string(statement, string):
-            stmt_in_string = False
-            if " " in statement and statement.lower() in string.lower():
-                stmt_in_string = True
-            else:
-                tokens = self.tokenize(string.lower())
-                if statement.lower() in tokens:
-                    stmt_in_string = True
-            return stmt_in_string
-
-        papers = self.papers
-        for field in self.SEARCH_PRIORITY:
-            if field in query:
-                req = query[field]
-                time_spans = []
-                if field in ["year", "month"]:
-                    for span in req:
+        results = []
+        fields = []
+        time_spans = defaultdict(list)
+        for f in self.SEARCH_PRIORITY:
+            if f in query:
+                fields.append(f)
+                if f in ["year", "month"]:
+                    for span in query[f]:
                         assert len(span) == 2
                         assert all(num.isdigit() for num in span)
-                        time_spans.append((int(span[0]), int(span[1])))
+                        time_spans[f].append((int(span[0]), int(span[1])))
 
-                paper_indices = []
-                for i, p in enumerate(papers):
-                    matched = False
-                    if time_spans:
-                        if any(s <= p[field] <= e for s, e in time_spans):
+        pbar = tqdm(self.papers)
+        found = 0
+        for p in pbar:
+            for f in fields:
+                matched = False
+                or_statements = query[f]
+
+                if f in time_spans:
+                    for s, e in time_spans[f]:
+                        if s <= p[f] <= e:
                             matched = True
-                    else:
-                        if any(
-                            all(
-                                _in_string(stmt, p[field])
-                                for stmt in and_statements
-                            )
-                            for and_statements in req
+                            break
+                else:
+                    for and_statements in or_statements:
+                        if all(
+                            self.in_string(stmt, p[f], lemmatization=lemmatization)
+                            for stmt in and_statements
                         ):
                             matched = True
+                            break
+                if not matched:
+                    break
+            else:
+                results.append(p)
+                found += 1
+                pbar.set_postfix({"found": found})
 
-                    if matched:
-                        paper_indices.append(i)
-                papers = [papers[i] for i in paper_indices]
-
-        return papers
+        return results
 
     def search(
         self, query: dict[str, tuple[tuple[str]]], method: str = "exhausted"
@@ -75,7 +87,11 @@ class SearchAPI:
         """
         papers = []
         if method == "exhausted":
-            papers = self.exhausted_search(query)
+            papers = self.exhausted_lemma_search(query)
+        elif method == "exhausted_lemma":
+            if self.nlp is None:
+                self.nlp = spacy.load("en_core_web_sm")
+            papers = self.exhausted_lemma_search(query, lemmatization=True)
         else:
             raise NotImplementedError
 
@@ -83,8 +99,13 @@ class SearchAPI:
             papers = sorted(set(papers), key=lambda p: (p.year, p.month), reverse=True)
         return papers
 
-    def tokenize(self, string: str) -> list[str]:
-        return string.lower().split()
+    def tokenize(self, string: str, lemmatization: bool = False) -> list[str]:
+        _string = string.lower()
+        if lemmatization:
+            doc = self.nlp(_string)
+            return [str(t.lemma_) for t in doc]
+        else:
+            return _string.split()
 
     @classmethod
     def build_paper_list(cls, *args, **kwargs):

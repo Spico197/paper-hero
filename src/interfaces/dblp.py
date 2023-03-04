@@ -1,8 +1,8 @@
+import logging
 import pathlib
 import random
 import re
 import time
-import logging
 
 import requests
 from tqdm import trange
@@ -10,7 +10,6 @@ from tqdm import trange
 from src.engine import SearchAPI
 from src.interfaces import Paper
 from src.utils import dump_json, load_json
-
 
 logger = logging.getLogger("uvicorn.default")
 
